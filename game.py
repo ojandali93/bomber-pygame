@@ -49,6 +49,50 @@ class Strawberry(GameObject):
     self.x = -64
     self.y = randint(50, 400)
 
+class Player(GameObject):
+  def __init__(self):
+    super(Player, self).__init__(0, 0, 'player.png')
+    # player is 32 x 32
+    self.dx = 250 - 32
+    self.dy = 250 - 32
+    self.reset()
+
+  def left(self):
+    if self.dx >= 32:
+      self.dx -= 32
+    else:
+      pass
+
+  def right(self):
+    if self.dx <= 408:
+      self.dx += 32
+    else:
+      pass
+
+  def up(self):
+    if self.dy >= 32:
+      self.dy -= 32
+    else:
+      pass
+
+  def down(self):
+    if self.dy <= 408:
+      self.dy += 32
+    else:
+      pass
+
+  def move(self):
+    self.x -= (self.x - self.dx) * 0.25
+    self.y -= (self.y - self.dy) * 0.25
+    # if self.x < 32 or self.x > 532s:
+    #   self.reset()
+    # if self.y < 32 or self.y > 532:
+    #   self.reset()
+
+  def reset(self):
+    self.x = 250 - 32
+    self.y = 250 - 32
+
 apple1 = Apple()
 apple2 = Apple()
 apple3 = Apple()
@@ -57,14 +101,27 @@ strawberry1 = Strawberry()
 strawberry2 = Strawberry()
 strawberry3 = Strawberry()
 
+player = Player()
+
 running = True
 while running:
-  # Looks at events
   for event in pygame.event.get():
     if event.type == pygame.QUIT:
       running = False
+    elif event.type == pygame.KEYDOWN:
+      if event.key == pygame.K_ESCAPE:
+        running = False
+      elif event.key == pygame.K_LEFT:
+        player.left()
+      elif event.key == pygame.K_RIGHT:
+        player.right()
+      elif event.key == pygame.K_UP:
+        player.up()
+      elif event.key == pygame.K_DOWN:
+        player.down()
   screen.fill((255, 255, 255))
 
+  player.move()
   apple1.move()
   apple2.move()
   apple1.move()
@@ -72,6 +129,7 @@ while running:
   strawberry2.move()
   strawberry3.move()
 
+  player.render(screen)
   apple1.render(screen)
   apple2.render(screen)
   apple3.render(screen)
