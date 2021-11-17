@@ -1,11 +1,13 @@
 import pygame
 from random import randint, choice
 
-lanes = [93, 218, 343]
+lanes = [93, 155.5, 218, 280.5, 343]
 
 pygame.init()
 clock = pygame.time.Clock()
 screen = pygame.display.set_mode([500, 500])
+
+score = 0
 
 class GameObject(pygame.sprite.Sprite):
   def __init__(self, x, y, image):
@@ -13,13 +15,16 @@ class GameObject(pygame.sprite.Sprite):
     self.surf = pygame.image.load(image)
     self.x = x
     self.y = y
+    self.rect = self.surf.get_rect()
   
   def render(self, screen):
+    self.rect.x = self.x 
+    self.rect.y = self.y 
     screen.blit(self.surf, (self.x, self.y))
 
 class Apple(GameObject):
   def __init__(self):
-    super(Apple, self).__init__(0, 0, 'apple.png')
+    super(Apple, self).__init__(0, 0, 'apple-sprite.png')
     self.dx = 0
     self.dy = (randint(0, 200) / 100) + 1
     self.reset()
@@ -36,7 +41,24 @@ class Apple(GameObject):
 
 class Strawberry(GameObject):
   def __init__(self):
-    super(Strawberry, self).__init__(0, 0, 'strawberry.png')
+    super(Strawberry, self).__init__(0, 0, 'strawberry-sprite.png')
+    self.dx = (randint(0, 200) / 100) + 1
+    self.dy = 0
+    self.reset()
+
+  def move(self):
+    self.x += self.dx
+    self.y += self.dy
+    if self.x > 500: 
+      self.reset()
+
+  def reset(self):
+    self.x = -64
+    self.y = choice(lanes)
+
+class Bomb(GameObject):
+  def __init__(self):
+    super(Bomb, self).__init__(0, 0, 'bomb-sprite.png')
     self.dx = (randint(0, 200) / 100) + 1
     self.dy = 0
     self.reset()
@@ -96,30 +118,24 @@ class Player(GameObject):
     self.dy = self.y
 
 player = Player()
+bomb = Bomb()
 apple1 = Apple()
-apple2 = Apple()
 strawberry1 = Strawberry()
-strawberry2 = Strawberry()
 
 all_sprites = pygame.sprite.Group()
 all_sprites.add(player)
 all_sprites.add(apple1)
-# all_sprites.add(apple2)
 all_sprites.add(strawberry1)
-# all_sprites.add(strawberry2)
+all_sprites.add(bomb)
 
-# apple = Apple()
-# apple2 = Apple()
-# apple3 = Apple()
 
-# strawberry = Strawberry()
-# strawberry2 = Strawberry()
-# strawberry3 = Strawberry()
+fruit_sprites = pygame.sprite.Group()
 
-# player = Player()
+fruit_sprites.add(apple1)
+fruit_sprites.add(strawberry1)
 
 running = True
-while running:
+while running: 
   for event in pygame.event.get():
     if event.type == pygame.QUIT:
       running = False
@@ -134,26 +150,15 @@ while running:
         player.up()
       elif event.key == pygame.K_DOWN:
         player.down()
-  screen.fill((255, 255, 255))
+  screen.fill((255, 255, 255)) 
   for entity in all_sprites:
     entity.move()
     entity.render(screen)
-
-  # player.move()
-  # apple1.move()
-  # apple2.move()
-  # apple1.move()
-  # strawberry1.move()
-  # strawberry2.move()
-  # strawberry3.move()
-
-  # player.render(screen)
-  # apple1.render(screen)
-  # apple2.render(screen)
-  # apple3.render(screen)
-  # strawberry1.render(screen)
-  # strawberry2.render(screen)
-  # strawberry3.render(screen)
+  fruit = pygame.sprite.spritecollideany(player, fruit_sprites)
+  if fruit:
+    fruit.reset()
+  if pygame.sprite.collide_rect(player, bomb):
+  	running = False
 
   pygame.display.flip()
   clock.tick(60)
